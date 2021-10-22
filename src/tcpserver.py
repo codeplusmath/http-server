@@ -21,7 +21,7 @@ class TCPServer:
         while True:
             conn, addr = s.accept()
             myprint(1, ("Connected by", addr,))
-            data = con.recv(8192)
+            data = conn.recv(8192)
             response = self.handle_request(data)
             conn.sendall(response)
             conn.close()
