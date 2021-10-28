@@ -21,6 +21,7 @@ class HTTPServer(TCPServer):
         202: 'Accepted'
         204: 'No Content',
         201: 'Created'
+        403: 'Forbidden'
     }
 
     
@@ -148,24 +149,47 @@ class HTTPServer(TCPServer):
     
 
     def handle_PUT(self, request):
-    
         path = './www/' + request.uri.strip('/')
         data = requests.request_data
         if os.path.exists(path):
-                #updated but entity body not returned
-                response-line = self.response_line(204)
-                #overwrite file
-                fr = open(path, 'wb')
-                for line in data:
-                        fr.writelines(line)
-                fr.close()
+            #updated but entity body not returned
+            response-line = self.response_line(204)
+            #overwrite file
+            fr = open(path, 'wb')
+            for line in data:
+                fr.writelines(line)
+            fr.close()
 
         else:
-                response_line = self.response_line(201)
-                f1 = open(path, 'wb')
-                for line in data:
-                    f1.writelines(line)
-                f1.close()
+            response_line = self.response_line(201)
+            f1 = open(path, 'wb')
+            for line in data:
+                f1.writelines(line)
+            f1.close()
+
+        #Sun, 06 Nov 1994 08:49:37 GMT
+        today = datetime.now()
+        d1 = "Date: " + today.strftime('%a') + ', '
+        d1 += today.strftime("%d %b %Y %H:%M:%S GMT")
+        d1 = d1.encode()
+        breakline = b'\r\n'
+    
+        uri = request.uri.encode()
+        response = b"".join([response_line , d1 , breakline , uri])
+        return response
+
+    def handle_POST(self, request):
+        path = './www/' + request.uri.strip('/')
+       	data = requests.request_data
+       	if os.path.exists(path):
+	    response-line = self.response_line(403)
+
+        else:
+            response_line = self.response_line(201)
+            f1 = open(path, 'wb')
+          	for line in data:
+          	    f1.writelines(line)
+            f1.close()
 
         #Sun, 06 Nov 1994 08:49:37 GMT
         today = datetime.now()
