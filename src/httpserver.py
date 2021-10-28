@@ -72,22 +72,49 @@ class HTTPServer(TCPServer):
         if os.path.exists(path) and not os.path.isdir(path): 
             response_line = self.response_line(200)
             content_type = mimetypes.guess_type(path)[0] or 'text/html'
-
-            extra_headers = {'Content-Type': content_type}
-            response_headers = self.response_headers(extra_headers)
-
+            
             with open(path, 'rb') as f:
                 response_body = f.read()
+                f.close()
+
+            content_length = len(response_body)
+            extra_headers = {'Content-Length': content_length, 'Content-Type': content_type}
+            response_headers = self.response_headers(extra_headers)
+
         else:
             response_line = self.response_line(404)
             response_headers = self.response_headers()
             response_body = b'<h1>404 Not Found</h1>'
 
         blank_line = b'\r\n'
-        f.close()
         response = b''.join([response_line, response_headers, blank_line, response_body])
         return response
     
+    
+    def handle_HEAD(self, request):
+        path = './www/' + request.uri.strip('/')
+
+        if not path:
+            path = './www/' + 'index.html'
+
+        if os.path.exists(path) and not os.path.isdir(path):
+            response_line = self.response_line(200)
+            content_type = mimetypes.guess_type(path)[0] or 'text/html'
+
+            content_length = os.path.getsize(path)
+            response_body = b''
+            extra_headers = {'Content-Length': content_length, 'Content-Type': content_type}
+            response_headers = self.response_headers(extra_headers)
+
+        else:
+            response_line = self.response_line(404)
+            response_headers = self.response_headers()
+            response_body = b'<h1>404 Not Found</h1>'
+
+        blank_line = b'\r\n'
+        response = b''.join([response_line, response_headers, blank_line, response_body])
+        return response
+
 
     def handle_DELETE(self, request):
         path = './www/' + request.uri.strip('/')
@@ -122,7 +149,7 @@ class HTTPServer(TCPServer):
     def handle_PUT(self, request):
     
         path = './www/' + request.uri.strip('/')
-        data = requests.data()
+        data = requests.request_data
         if os.path.exists(path):
                 #updated but entity body not returned
                 response-line = self.response_line(204)
@@ -149,7 +176,6 @@ class HTTPServer(TCPServer):
         uri = request.uri.encode()
         response = b"".join([response_line , d1 , breakline , uri])
         return response
-
 
 
     def HTTP_501_handler(self, request):
