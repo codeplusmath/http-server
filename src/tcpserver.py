@@ -40,9 +40,9 @@ class HTTPRequest:
     def parse(self, data):
         lines = data.split(b'\r\n')
         request_line = lines[0]
-        
+        request_parts = data.split(b'\r\n\r\n')
         try:
-            self.request_data = lines[1]
+            self.request_data = request_parts[1]
         except:
             print('No-Content')
 

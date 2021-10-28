@@ -20,6 +20,7 @@ class HTTPServer(TCPServer):
         501: 'Not Implemented',
         202: 'Accepted'
         204: 'No Content',
+        201: 'Created'
     }
 
     
