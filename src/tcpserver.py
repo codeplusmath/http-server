@@ -35,6 +35,7 @@ class HTTPRequest:
         self.uri = None
         self.http_version = '1.1' 
         self.request_data = ''
+        self.other_headers = ''
         self.parse(data)
 
     def parse(self, data):
@@ -43,9 +44,10 @@ class HTTPRequest:
         request_parts = data.split(b'\r\n\r\n')
         try:
             self.request_data = request_parts[1]
+
         except:
             print('No-Content')
-
+        self.other_headers = request_parts[0].split(b'\r\n')[1:]
         words = request_line.split(b' ') 
 
         self.method = words[0].decode() 

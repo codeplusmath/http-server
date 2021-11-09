@@ -122,12 +122,12 @@ class HTTPServer(TCPServer):
         path = './www/' + request.uri.strip('/')
         
         if os.path.exits(path):
-            try:
+            if(os.access(path, os.W_OK):
                 os.remove(path)
                 response_line = self.response_line(200)
                 response_body = "<html><body><h1>File deleted.</h1></body></html>"
 
-            except:
+            else:
                 if(os.path.exits(absolute_path)):
                     response_line = self.response_line(202)
                     response_body = ""
@@ -182,8 +182,22 @@ class HTTPServer(TCPServer):
         path = './www/' + request.uri.strip('/')
        	data = requests.request_data
        	if os.path.exists(path):
-	    response-line = self.response_line(403)
+            try:
+                words = request.uri.split('(')
+                count = int(words[1][0])
+                count += 1
+                path = words[0] + '(' + str(count) + words[1:]
+            except:
+                words = request.uri.split('.')
+                path = words[0] + ' (1)' + words[1]
 
+	    response-line = self.response_line(403)
+            #content type checking 
+            fp = open(path, 'wb')
+    	    for line in data:
+    		fp.writelines(line)
+    	    fp.close()
+    	
         else:
             response_line = self.response_line(201)
             f1 = open(path, 'wb')
