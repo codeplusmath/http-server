@@ -5,7 +5,11 @@ import socket
 import mimetypes
 from tcpserver import *
 from datetime import datetime
+import cookies
+from linecache import getline
 
+global cookie_status_flag
+cookie_status_flag = 0
 
 class HTTPServer(TCPServer):
 
@@ -67,7 +71,7 @@ class HTTPServer(TCPServer):
     
     def handle_GET(self, request):
         path = './www/' + request.uri.strip('/') 
-
+        
         if not path:
             path = './www/' + 'index.html'
 
@@ -81,15 +85,34 @@ class HTTPServer(TCPServer):
 
             content_length = len(response_body)
             extra_headers = {'Content-Length': content_length, 'Content-Type': content_type}
-            response_headers = self.response_headers(extra_headers)
 
         else:
             response_line = self.response_line(404)
-            response_headers = self.response_headers()
             response_body = b'<h1>404 Not Found</h1>'
+            content_length = len(response_body)
+            extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html'}
 
+        cookie_string = 'cookie'
+
+        if self.other_headers['cookie'] and os.path.exists(f'../cookies/{self.other_headers[cookie_string]}'):
+            edate = datetime.date(getline(f'../cookies/{self.other_headers[cookie_string]}', 2).strip('\n'))
+
+            if edate - datetime.now() >=0:
+                cookie_status_flag = 1
+            
+            else:
+                os.remove(f'../cookies/{self.other_headers[cookie_string]}')
+                cookie_header = cookies.setcookie(./www/login.html)
+                c = self.other_headers.pop('cookie')
+        
+        else path == './www/login.html':
+            cookie_header = cookies.setcookie(path)
+            c = self.other_headers.pop('cookie')
+
+        response_headers = self.response_headers(extra_headers)
+        other_headers = self.response_headers(self.other_headers)
         blank_line = b'\r\n'
-        response = b''.join([response_line, response_headers, blank_line, response_body])
+        response = b''.join([response_line, response_headers, other_headers, blank_line, response_body])
         return response
     
     
@@ -126,7 +149,7 @@ class HTTPServer(TCPServer):
                 os.remove(path)
                 response_line = self.response_line(200)
                 response_body = "<html><body><h1>File deleted.</h1></body></html>"
-
+                
             else:
                 if(os.path.exits(absolute_path)):
                     response_line = self.response_line(202)

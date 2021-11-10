@@ -2,6 +2,7 @@
 import socket
 import sys
 import logging
+import headerfilter
 
 global USER
 USER = sys.argv[0] or 0
@@ -47,7 +48,7 @@ class HTTPRequest:
 
         except:
             print('No-Content')
-        self.other_headers = request_parts[0].split(b'\r\n')[1:]
+        self.other_headers = headerfilter.hfilter(request_parts[0].split(b'\r\n')[1:])
         words = request_line.split(b' ') 
 
         self.method = words[0].decode() 
