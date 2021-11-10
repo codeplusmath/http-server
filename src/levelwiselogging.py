@@ -3,9 +3,9 @@
 Users = {'Normal':0, 'Admin':1, 'Developer':2}
 
 class levelwiselogging():
-    self.configfile = 'usr.config'
+    self.configfile = '../config/config.py'
     self.usertype = self.getUserType()
-    self.logfile = 'logs.log'
+    self.logfile = '../logs/log.txt'
 
     def getUserType(self):
         with open(self.configfile, 'r') as fileobj:

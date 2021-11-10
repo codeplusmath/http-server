@@ -10,7 +10,7 @@ from datetime import datetime
 class HTTPServer(TCPServer):
 
     headers = {
-        'Server': 'CrudeServer',
+        'Server': 'CNServer'
         'Content-Type': 'text/html',
     }
 
