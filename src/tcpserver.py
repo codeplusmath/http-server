@@ -1,9 +1,8 @@
 #!/usr/bin/python
 import socket
 import sys
-import logging
-import headerfilter
-
+from levelwiselogging import *
+import headerfilter 
 global USER
 USER = sys.argv[0] or 0
 
@@ -18,11 +17,11 @@ class TCPServer:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.host, self.port))
         s.listen()
-        #myprint(0, ("Listening at", s.getsockname(),))
+        lprint(0, ("Listening at", s.getsockname(),))
 
         while True:
             conn, addr = s.accept()
-            #myprint(1, ("Connected by", addr,))
+            lprint(1, ("Connected by", addr,))
             data = conn.recv(8192)
             response = self.handle_request(data)
             conn.sendall(response)

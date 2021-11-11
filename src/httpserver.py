@@ -14,7 +14,7 @@ cookie_status_flag = 0
 class HTTPServer(TCPServer):
 
     headers = {
-        'Server': 'CNServer'
+        'Server': 'CNServer',
         'Content-Type': 'text/html',
     }
 
@@ -22,10 +22,10 @@ class HTTPServer(TCPServer):
         200: 'OK',
         404: 'Not Found',
         501: 'Not Implemented',
-        202: 'Accepted'
+        202: 'Accepted',
         204: 'No Content',
-        201: 'Created'
-        403: 'Forbidden'
+        201: 'Created',
+        403: 'Forbidden',
     }
 
     
@@ -106,13 +106,15 @@ class HTTPServer(TCPServer):
  
             else:
                 os.remove(f'../cookies/{self.other_headers[cookie_string]}')
-                cookie_header = cookies.setcookie(./www/login.html)
+                cookie_header = cookies.setcookie('./www/login.html')
                 c = self.other_headers.pop('cookie')
         
-        else path == './www/login.html':
+        elif path == './www/login.html':
             cookie_header = cookies.setcookie(path)
             c = self.other_headers.pop('cookie')
 
+        else:
+            pass
         response_headers = self.response_headers(extra_headers)
         other_headers = self.response_headers(self.other_headers)
         blank_line = b'\r\n'
@@ -150,7 +152,7 @@ class HTTPServer(TCPServer):
         path = './www/' + request.uri.strip('/')
         
         if os.path.exits(path):
-            if(os.access(path, os.W_OK):
+            if(os.access(path, os.W_OK)):
                 os.remove(path)
                 response_line = self.response_line(200)
                 response_body = "<html><body><h1>File deleted.</h1></body></html>"
@@ -182,7 +184,7 @@ class HTTPServer(TCPServer):
         data = requests.request_data
         if os.path.exists(path):
             #updated but entity body not returned
-            response-line = self.response_line(204)
+            response_line = self.response_line(204)
             #overwrite file
             fr = open(path, 'wb')
             for line in data:
@@ -221,18 +223,18 @@ class HTTPServer(TCPServer):
                 words = request.uri.split('.')
                 path = words[0] + ' (1)' + words[1]
 
-	    response-line = self.response_line(403)
+            response_line = self.response_line(403)
             #content type checking 
             fp = open(path, 'wb')
-    	    for line in data:
-    		fp.writelines(line)
-    	    fp.close()
+            for line in data:
+                fp.writelines(line)
+            fp.close()
     	
         else:
             response_line = self.response_line(201)
             f1 = open(path, 'wb')
-          	for line in data:
-          	    f1.writelines(line)
+            for line in data:
+                f1.writelines(line)
             f1.close()
 
         #Sun, 06 Nov 1994 08:49:37 GMT
@@ -256,6 +258,6 @@ class HTTPServer(TCPServer):
         
         other_headers = self.response_headers(self.other_headers)
 
-        return b"".join([response_line, response_headers, other_headers, blank_line, response_body]
+        return b"".join([response_line, response_headers, other_headers, blank_line, response_body])
 
 
