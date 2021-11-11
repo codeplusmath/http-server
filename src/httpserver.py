@@ -99,7 +99,11 @@ class HTTPServer(TCPServer):
 
             if edate - datetime.now() >=0:
                 cookie_status_flag = 1
-            
+                path = './www/' + 'afterlogin.html'    
+                with open(path, 'rb') as f:
+                    response_body = f.read()
+                    f.close()
+ 
             else:
                 os.remove(f'../cookies/{self.other_headers[cookie_string]}')
                 cookie_header = cookies.setcookie(./www/login.html)
@@ -136,8 +140,9 @@ class HTTPServer(TCPServer):
             response_headers = self.response_headers()
             response_body = b'<h1>404 Not Found</h1>'
 
+        other_headers = self.response_headers(self.other_headers)
         blank_line = b'\r\n'
-        response = b''.join([response_line, response_headers, blank_line, response_body])
+        response = b''.join([response_line, response_headers, other_headers, blank_line, response_body])
         return response
 
 
@@ -167,7 +172,8 @@ class HTTPServer(TCPServer):
         response_fields = "Date: %s\r\n" %(d1)
         response_fields = response_fields.encode()
         breakline = b'\r\n'
-        response = b"".join([response_line, breakline, response_fields, response_body])
+        other_headers = self.response_headers(self.other_headers)
+        response = b"".join([response_line, response_fields, other_headers, breakline, response_body])
         return response
     
 
@@ -198,7 +204,8 @@ class HTTPServer(TCPServer):
         breakline = b'\r\n'
     
         uri = request.uri.encode()
-        response = b"".join([response_line , d1 , breakline , uri])
+        other_headers = self.response_headers(self.other_headers)
+        response = b"".join([response_line , d1 , other_headers, breakline , uri])
         return response
 
     def handle_POST(self, request):
@@ -235,8 +242,9 @@ class HTTPServer(TCPServer):
         d1 = d1.encode()
         breakline = b'\r\n'
     
+        other_headers = self.response_headers(self.other_headers)
         uri = request.uri.encode()
-        response = b"".join([response_line , d1 , breakline , uri])
+        response = b"".join([response_line , d1 , other_headers, breakline , uri])
         return response
 
 
@@ -245,7 +253,9 @@ class HTTPServer(TCPServer):
         response_headers = self.response_headers()
         blank_line = b'\r\n'
         response_body = b'<h1>501 Not Implemented</h1>'
+        
+        other_headers = self.response_headers(self.other_headers)
 
-        return b"".join([response_line, response_headers, blank_line, response_body]
+        return b"".join([response_line, response_headers, other_headers, blank_line, response_body]
 
 
