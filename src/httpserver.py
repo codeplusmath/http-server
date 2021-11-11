@@ -212,8 +212,22 @@ class HTTPServer(TCPServer):
 
     def handle_POST(self, request):
         path = './www/' + request.uri.strip('/')
-       	data = requests.request_data
-       	if os.path.exists(path):
+       	#data = requests.request_data
+        if(self.other_headers["Content-Type"] == "application/x-www-form-urlencoded"):
+            data = self.request_data.split('&')
+
+        elif(self.other_headers["Content-Type"].split(';')[0] == "multipart/form-data"):
+            separator = self.other_headers["Content-Type"].split(';')[1]
+            raw_data = self.request_data.split(f'--{separator}')
+            data = ''
+            for x in range(1, len(raw_data)-1):    
+                d = raw_data[x].split('; ')
+                for y in range(1, len(d)):
+                    data += d[y].replace('\r\n', ' ') 
+        else:
+            data = self.request_data
+
+        if os.path.exists(path):
             try:
                 words = request.uri.split('(')
                 count = int(words[1][0])
