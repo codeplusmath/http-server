@@ -7,6 +7,7 @@ from tcpserver import *
 from datetime import datetime
 import cookies
 from linecache import getline
+import hashlib
 
 global cookie_status_flag
 cookie_status_flag = 0
@@ -77,20 +78,23 @@ class HTTPServer(TCPServer):
 
         if os.path.exists(path) and not os.path.isdir(path): 
             response_line = self.response_line(200)
-            content_type = mimetypes.guess_type(path)[0] or 'text/html'
-            
+            content_type = mimetypes.guess_type(path)[0] + '; charset=utf-8' or 'text/html' + '; charset=utf-8'
+            stat = os.stat(path)
+            last_modified = datetime.fromtimestamp(stat.st_mtime).strftime('%d %b %Y %H:%M:%S GMT')
             with open(path, 'rb') as f:
                 response_body = f.read()
+                md5 = hashlib.md5(response_body).hexdigest()
                 f.close()
-
+            
             content_length = len(response_body)
-            extra_headers = {'Content-Length': content_length, 'Content-Type': content_type}
+            extra_headers = {'Content-Length': content_length, 'Content-Type': content_type, 'Content-Encoding': 'gzip', 'Last-Modified': last_modified, 'Content-md5': md5}
 
         else:
             response_line = self.response_line(404)
             response_body = b'<h1>404 Not Found</h1>'
             content_length = len(response_body)
-            extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html'}
+            md5 = hashlib.md5(response_body).hexdigest()
+            extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Content-md5': md5}
 
         cookie_string = 'cookie'
 
@@ -115,10 +119,16 @@ class HTTPServer(TCPServer):
 
         else:
             pass
+
+        today = datetime.now()
+        d1 = "Date: " + today.strftime('%a') + ', '
+        d1 += today.strftime("%d %b %Y %H:%M:%S GMT")
+        d1 = d1.encode()
+
         response_headers = self.response_headers(extra_headers)
         other_headers = self.response_headers(request.other_headers)
         blank_line = b'\r\n'
-        response = b''.join([response_line, response_headers, other_headers, blank_line, response_body])
+        response = b''.join([response_line, response_headers, d1, blank_line, other_headers, blank_line, response_body])
         return response
     
     
@@ -130,7 +140,7 @@ class HTTPServer(TCPServer):
 
         if os.path.exists(path) and not os.path.isdir(path):
             response_line = self.response_line(200)
-            content_type = mimetypes.guess_type(path)[0] or 'text/html'
+            content_type = mimetypes.guess_type(path)[0] + '; charset=utf-8' or 'text/html' + '; charset=utf-8'
 
             content_length = os.path.getsize(path)
             response_body = b''
@@ -139,12 +149,19 @@ class HTTPServer(TCPServer):
 
         else:
             response_line = self.response_line(404)
-            response_headers = self.response_headers()
             response_body = b'<h1>404 Not Found</h1>'
+            md5 = hashlib.md5(response_body).hexdigest()
+            extra_headers = {'Content-Length': content_length, 'Content-Type': 'txt/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Content-md5': md5}
+            response_headers = self.response_headers(extra_headers)
 
+        today = datetime.now()
+        d1 = "Date: " + today.strftime('%a') + ', '
+        d1 += today.strftime("%d %b %Y %H:%M:%S GMT")
+        d1 = d1.encode()
+        
         other_headers = self.response_headers(request.other_headers)
         blank_line = b'\r\n'
-        response = b''.join([response_line, response_headers, other_headers, blank_line, response_body])
+        response = b''.join([response_line, response_headers, d1, blank_line, other_headers, blank_line, response_body])
         return response
 
 
@@ -156,8 +173,12 @@ class HTTPServer(TCPServer):
                 os.remove(path)
                 response_line = self.response_line(200)
                 response_body = "<html><body><h1>File deleted.</h1></body></html>"
-                
+                md5 = hashlib.md5(response_body).hexdigest()
+                extra_headers = {'Content-Length': content_length, 'Content-Type': 'txt/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Content-md5': md5}
+                response_headers = self.response_headers(extra_headers)
+
             else:
+                response_headers = self.response_headers()
                 if(os.path.exits(absolute_path)):
                     response_line = self.response_line(202)
                     response_body = ""
@@ -166,6 +187,7 @@ class HTTPServer(TCPServer):
                     response_body = ""
                     
         else:
+            response_headers = self.response_headers()
             response_line = self.response_line(404)
           
         today = datetime.now()
@@ -175,7 +197,7 @@ class HTTPServer(TCPServer):
         response_fields = response_fields.encode()
         breakline = b'\r\n'
         other_headers = self.response_headers(request.other_headers)
-        response = b"".join([response_line, response_fields, other_headers, breakline, response_body])
+        response = b"".join([response_line, response_headers, response_fields, other_headers, breakline, response_body])
         return response
     
 
