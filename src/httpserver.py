@@ -94,8 +94,8 @@ class HTTPServer(TCPServer):
 
         cookie_string = 'cookie'
 
-        if self.other_headers['cookie'] and os.path.exists(f'../cookies/{self.other_headers[cookie_string]}'):
-            edate = datetime.date(getline(f'../cookies/{self.other_headers[cookie_string]}', 2).strip('\n'))
+        if request.other_headers['cookie'] and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
+            edate = datetime.date(getline(f'../cookies/{request.other_headers[cookie_string]}', 2).strip('\n'))
 
             if edate - datetime.now() >=0:
                 cookie_status_flag = 1
@@ -105,7 +105,7 @@ class HTTPServer(TCPServer):
                     f.close()
  
             else:
-                os.remove(f'../cookies/{self.other_headers[cookie_string]}')
+                os.remove(f'../cookies/{request.other_headers[cookie_string]}')
                 cookie_header = cookies.setcookie('./www/login.html')
                 c = self.other_headers.pop('cookie')
         
@@ -116,7 +116,7 @@ class HTTPServer(TCPServer):
         else:
             pass
         response_headers = self.response_headers(extra_headers)
-        other_headers = self.response_headers(self.other_headers)
+        other_headers = self.response_headers(request.other_headers)
         blank_line = b'\r\n'
         response = b''.join([response_line, response_headers, other_headers, blank_line, response_body])
         return response
@@ -142,7 +142,7 @@ class HTTPServer(TCPServer):
             response_headers = self.response_headers()
             response_body = b'<h1>404 Not Found</h1>'
 
-        other_headers = self.response_headers(self.other_headers)
+        other_headers = self.response_headers(request.other_headers)
         blank_line = b'\r\n'
         response = b''.join([response_line, response_headers, other_headers, blank_line, response_body])
         return response
@@ -174,14 +174,14 @@ class HTTPServer(TCPServer):
         response_fields = "Date: %s\r\n" %(d1)
         response_fields = response_fields.encode()
         breakline = b'\r\n'
-        other_headers = self.response_headers(self.other_headers)
+        other_headers = self.response_headers(request.other_headers)
         response = b"".join([response_line, response_fields, other_headers, breakline, response_body])
         return response
     
 
     def handle_PUT(self, request):
         path = './www/' + request.uri.strip('/')
-        data = requests.request_data
+        data = request.request_data
         if os.path.exists(path):
             #updated but entity body not returned
             response_line = self.response_line(204)
@@ -206,26 +206,26 @@ class HTTPServer(TCPServer):
         breakline = b'\r\n'
     
         uri = request.uri.encode()
-        other_headers = self.response_headers(self.other_headers)
+        other_headers = self.response_headers(request.other_headers)
         response = b"".join([response_line , d1 , other_headers, breakline , uri])
         return response
 
     def handle_POST(self, request):
         path = './www/' + request.uri.strip('/')
        	#data = requests.request_data
-        if(self.other_headers["Content-Type"] == "application/x-www-form-urlencoded"):
-            data = self.request_data.split('&')
+        if(request.other_headers["Content-Type"] == "application/x-www-form-urlencoded"):
+            data = request.request_data.split('&')
 
-        elif(self.other_headers["Content-Type"].split(';')[0] == "multipart/form-data"):
-            separator = self.other_headers["Content-Type"].split(';')[1]
-            raw_data = self.request_data.split(f'--{separator}')
+        elif(request.other_headers["Content-Type"].split(';')[0] == "multipart/form-data"):
+            separator = request.other_headers["Content-Type"].split(';')[1]
+            raw_data = request.request_data.split(f'--{separator}')
             data = ''
             for x in range(1, len(raw_data)-1):    
                 d = raw_data[x].split('; ')
                 for y in range(1, len(d)):
                     data += d[y].replace('\r\n', ' ') 
         else:
-            data = self.request_data
+            data = request.request_data
 
         if os.path.exists(path):
             try:
@@ -258,7 +258,7 @@ class HTTPServer(TCPServer):
         d1 = d1.encode()
         breakline = b'\r\n'
     
-        other_headers = self.response_headers(self.other_headers)
+        other_headers = self.response_headers(request.other_headers)
         uri = request.uri.encode()
         response = b"".join([response_line , d1 , other_headers, breakline , uri])
         return response
@@ -270,7 +270,7 @@ class HTTPServer(TCPServer):
         blank_line = b'\r\n'
         response_body = b'<h1>501 Not Implemented</h1>'
         
-        other_headers = self.response_headers(self.other_headers)
+        other_headers = self.response_headers(request.other_headers)
 
         return b"".join([response_line, response_headers, other_headers, blank_line, response_body])
 

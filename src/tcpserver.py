@@ -1,11 +1,12 @@
 #!/usr/bin/python
 import socket
 import sys
-from levelwiselogging import *
+import levelwiselogging
 import headerfilter 
 global USER
 USER = sys.argv[0] or 0
 
+logg = levelwiselogging.levelwiselogging()
 
 class TCPServer:
     def __init__(self, host = '127.0.0.1', port = 8888):
@@ -17,11 +18,11 @@ class TCPServer:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.host, self.port))
         s.listen()
-        lprint(0, ("Listening at", s.getsockname(),))
+        logg.lprint(0, ("Listening at", s.getsockname(),))
 
         while True:
             conn, addr = s.accept()
-            lprint(1, ("Connected by", addr,))
+            logg.lprint(1, ("Connected by", addr,))
             data = conn.recv(8192)
             response = self.handle_request(data)
             conn.sendall(response)

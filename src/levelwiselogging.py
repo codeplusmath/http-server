@@ -3,7 +3,7 @@
 Users = {'Normal':0, 'Admin':1, 'Developer':2}
 
 class levelwiselogging:
-    def __init__():
+    def __init__(self):
         self.configfile = '../config/config.py'
         self.usertype = self.getUserType()
         self.logfile = '../logs/log.txt'
@@ -18,7 +18,7 @@ class levelwiselogging:
                     else:
                         return 0
 
-    def lPrint(self, level, tup):
+    def lprint(self, level, tup):
         if level == self.usertype:
             try:
                 f = open(self.logfile, 'a')
