@@ -94,7 +94,7 @@ class HTTPServer(TCPServer):
 
         cookie_string = 'cookie'
 
-        if request.other_headers['cookie'] and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
+        if request.other_headers.has_key('cookie') and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
             edate = datetime.date(getline(f'../cookies/{request.other_headers[cookie_string]}', 2).strip('\n'))
 
             if edate - datetime.now() >=0:
