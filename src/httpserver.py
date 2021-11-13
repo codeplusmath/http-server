@@ -40,7 +40,7 @@ class HTTPServer(TCPServer):
         except AttributeError:
             handler = self.HTTP_501_handler
 
-        response = handler(request)
+        response, connectiontype = handler(request)
         return response
 
 
@@ -140,7 +140,8 @@ class HTTPServer(TCPServer):
         other_headers = self.response_headers(request.other_headers)
         blank_line = b'\r\n'
         response = b''.join([response_line, response_headers, d1, blank_line, other_headers, blank_line, response_body])
-        return response
+        
+        return response, request.other_headers['Connection']
     
     
     def handle_HEAD(self, request):
@@ -173,7 +174,8 @@ class HTTPServer(TCPServer):
         other_headers = self.response_headers(request.other_headers)
         blank_line = b'\r\n'
         response = b''.join([response_line, response_headers, d1, blank_line, other_headers, blank_line, response_body])
-        return response
+        
+        return response, request.other_headers['Connection']
 
 
     def handle_DELETE(self, request):
@@ -209,7 +211,8 @@ class HTTPServer(TCPServer):
         breakline = b'\r\n'
         other_headers = self.response_headers(request.other_headers)
         response = b"".join([response_line, response_headers, response_fields, other_headers, breakline, response_body])
-        return response
+        
+        return response, request.other_headers['Connection']
     
 
     def handle_PUT(self, request):
@@ -241,7 +244,8 @@ class HTTPServer(TCPServer):
         uri = request.uri.encode()
         other_headers = self.response_headers(request.other_headers)
         response = b"".join([response_line , d1 , other_headers, breakline , uri])
-        return response
+        
+        return response, request.other_headers['Connection']
 
     def handle_POST(self, request):
         path = './www/' + request.uri.strip('/')
@@ -294,7 +298,8 @@ class HTTPServer(TCPServer):
         other_headers = self.response_headers(request.other_headers)
         uri = request.uri.encode()
         response = b"".join([response_line , d1 , other_headers, breakline , uri])
-        return response
+
+        return response, request.other_headers['Connection']
 
 
     def HTTP_501_handler(self, request):
@@ -305,6 +310,6 @@ class HTTPServer(TCPServer):
         
         other_headers = self.response_headers(request.other_headers)
 
-        return b"".join([response_line, response_headers, other_headers, blank_line, response_body])
+        return b"".join([response_line, response_headers, other_headers, blank_line, response_body]), 'Close'
 
 

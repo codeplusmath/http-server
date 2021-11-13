@@ -3,8 +3,9 @@ import socket
 import sys
 import levelwiselogging
 import headerfilter 
-global USER
-USER = sys.argv[0] or 0
+import threading
+
+from config.config import HOST, PORT, USER, MAX_CONNECTIONS
 
 logg = levelwiselogging.levelwiselogging()
 
@@ -19,13 +20,31 @@ class TCPServer:
         s.bind((self.host, self.port))
         s.listen()
         logg.lprint(0, ("Listening at", s.getsockname(),))
+        
+        thread_list = []
 
         while True:
             conn, addr = s.accept()
             logg.lprint(1, ("Connected by", addr,))
-            data = conn.recv(8192)
-            response = self.handle_request(data)
-            conn.sendall(response)
+            
+            th = threading.Thread(target = self.handle_all, args=(conn, addr))
+            th.start()
+            thread_list.append(th)
+            if threading.active_count() > MAX_CONNECTIONS:
+                th.join()
+                print('Connection Limit exceeded. Retrying in 5 seconds')
+                time.sleep(5)
+        
+        for i in thread_list:
+            i.join()
+    
+
+    def handle_all(self, conn, addr):
+        data = conn.recv(8192)
+        response , connectiontype = self.handle_request(data)
+        conn.sendall(response)
+        
+        if(connectiontype == 'Close')
             conn.close()
 
 		
