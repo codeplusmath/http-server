@@ -8,6 +8,7 @@ from datetime import datetime
 import cookies
 from linecache import getline
 import hashlib
+import random
 
 global cookie_status_flag
 cookie_status_flag = 0
@@ -27,6 +28,7 @@ class HTTPServer(TCPServer):
         204: 'No Content',
         201: 'Created',
         403: 'Forbidden',
+        304: 'Not Modified'
     }
 
     
@@ -76,6 +78,15 @@ class HTTPServer(TCPServer):
         if not path:
             path = './www/' + 'index.html'
 
+        if request.other_headers.has_key('If-None-Match'):
+            Etag = request.other_headers['If-None-Match']
+            request.other_headers.pop('If-None-Match')
+            request.other_headers['Etag'] = Etag
+        else:
+            Etag = hashlib.md5(os.urandom(32)).hexdigest()
+            request.other_headers.pop('If-None-Match')
+            request.other_headers['Etag'] = Etag
+
         if os.path.exists(path) and not os.path.isdir(path): 
             response_line = self.response_line(200)
             content_type = mimetypes.guess_type(path)[0] + '; charset=utf-8' or 'text/html' + '; charset=utf-8'
@@ -87,14 +98,14 @@ class HTTPServer(TCPServer):
                 f.close()
             
             content_length = len(response_body)
-            extra_headers = {'Content-Length': content_length, 'Content-Type': content_type, 'Content-Encoding': 'gzip', 'Last-Modified': last_modified, 'Content-md5': md5}
+            extra_headers = {'Content-Length': content_length, 'Content-Type': content_type, 'Content-Encoding': 'gzip', 'Last-Modified': last_modified, 'Etag': Etag,'Content-md5': md5}
 
         else:
             response_line = self.response_line(404)
             response_body = b'<h1>404 Not Found</h1>'
             content_length = len(response_body)
             md5 = hashlib.md5(response_body).hexdigest()
-            extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Content-md5': md5}
+            extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Etag': Etag, 'Content-md5': md5}
 
         cookie_string = 'cookie'
 
@@ -111,11 +122,11 @@ class HTTPServer(TCPServer):
             else:
                 os.remove(f'../cookies/{request.other_headers[cookie_string]}')
                 cookie_header = cookies.setcookie('./www/login.html')
-                c = self.other_headers.pop('cookie')
+                request.other_headers.pop('cookie')
         
         elif path == './www/login.html':
             cookie_header = cookies.setcookie(path)
-            c = self.other_headers.pop('cookie')
+            self.other_headers.pop('cookie')
 
         else:
             pass
