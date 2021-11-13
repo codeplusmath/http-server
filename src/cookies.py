@@ -1,7 +1,10 @@
 import random
 from datetime import datetime, timedelta
+import hashlib
+import os
+
 def set_cookie(path):
-    cookie_id = random.randint(1000, 50000)
+    cookie_id = hashlib.md5(os.urandom(8)).hexdigest()
     expire_date = datetime.now() + timedelta(days=10)
     d1 = expire_date.strftime('%a') + ', '
     d1 += expire_date.strftime("%d-%b-%Y %H:%M:%S GMT")

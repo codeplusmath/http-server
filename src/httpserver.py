@@ -107,9 +107,9 @@ class HTTPServer(TCPServer):
             md5 = hashlib.md5(response_body).hexdigest()
             extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Etag': Etag, 'Content-md5': md5}
 
-        cookie_string = 'cookie'
+        cookie_string = 'Cookie'
 
-        if request.other_headers.has_key('cookie') and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
+        if request.other_headers.has_key('Cookie') and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
             edate = datetime.date(getline(f'../cookies/{request.other_headers[cookie_string]}', 2).strip('\n'))
 
             if edate - datetime.now() >=0:
@@ -126,7 +126,7 @@ class HTTPServer(TCPServer):
         
         elif path == './www/login.html':
             cookie_header = cookies.setcookie(path)
-            self.other_headers.pop('cookie')
+            self.other_headers.pop('Cookie')
 
         else:
             pass
@@ -240,11 +240,12 @@ class HTTPServer(TCPServer):
         d1 += today.strftime("%d %b %Y %H:%M:%S GMT")
         d1 = d1.encode()
         breakline = b'\r\n'
-    
-        uri = request.uri.encode()
-        other_headers = self.response_headers(request.other_headers)
-        response = b"".join([response_line , d1 , other_headers, breakline , uri])
         
+        uri = request.uri.encode()
+        extra_headers = {'Content-Location': request.uri}
+        response_headers = self.response_headers(extra_headers)
+        other_headers = self.response_headers(request.other_headers)
+        response = b"".join([response_line , d1 , response_headers, other_headers, breakline , uri])
         return response, request.other_headers['Connection']
 
     def handle_POST(self, request):
