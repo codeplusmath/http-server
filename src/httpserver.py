@@ -223,19 +223,21 @@ class HTTPServer(TCPServer):
         path = '../www/' + request.uri.strip('/')
         data = request.request_data
         if os.path.exists(path):
-            #updated but entity body not returned
-            response_line = self.response_line(204)
-            #overwrite file
-            fr = open(path, 'wb')
-            for line in data:
-                fr.writelines(line)
-            fr.close()
+            if(os.access(path, os.W_OK)):
+                #updated but entity body not returned
+                response_line = self.response_line(204)
+                #overwrite file
+                fr = open(path, 'wb')
+                fr.write(data)
+                fr.close()
+            
+            else:
+                response_line = self.response_line(403)
 
         else:
             response_line = self.response_line(201)
             f1 = open(path, 'wb')
-            for line in data:
-                f1.writelines(line)
+            f1.write(data)
             f1.close()
 
         #Sun, 06 Nov 1994 08:49:37 GMT
@@ -249,48 +251,51 @@ class HTTPServer(TCPServer):
         extra_headers = {'Content-Location': request.uri}
         response_headers = self.response_headers(extra_headers)
         other_headers = self.response_headers(request.other_headers)
-        response = b"".join([response_line , d1 , response_headers, other_headers, breakline , uri])
+        response = b"".join([response_line , d1 , response_headers, other_headers, breakline])   
         return response, request.other_headers['Connection']
 
     def handle_POST(self, request):
         path = '../www/' + request.uri.strip('/')
-       	#data = requests.request_data
-        if(request.other_headers["Content-Type"] == "application/x-www-form-urlencoded"):
-            data = request.request_data.split('&')
+       	data = request.request_data
+        if 'Content-Type' in request.other_headers:
+            if(request.other_headers["Content-Type"] == "application/x-www-form-urlencoded"):
+                data = request.request_data.split('&')
 
-        elif(request.other_headers["Content-Type"].split(';')[0] == "multipart/form-data"):
-            separator = request.other_headers["Content-Type"].split(';')[1]
-            raw_data = request.request_data.split(f'--{separator}')
-            data = ''
-            for x in range(1, len(raw_data)-1):    
-                d = raw_data[x].split('; ')
-                for y in range(1, len(d)):
-                    data += d[y].replace('\r\n', ' ') 
-        else:
-            data = request.request_data
+            elif(request.other_headers["Content-Type"].split(';')[0] == "multipart/form-data"):
+                separator = request.other_headers["Content-Type"].split(';')[1]
+                raw_data = request.request_data.split(f'--{separator}')
+                data = ''
+                for x in range(1, len(raw_data)-1):    
+                    d = raw_data[x].split('; ')
+                    for y in range(1, len(d)):
+                        data += d[y].replace('\r\n', ' ') 
+            else:
+                data = request.request_data
 
         if os.path.exists(path):
-            try:
-                words = request.uri.split('(')
-                count = int(words[1][0])
-                count += 1
-                path = words[0] + '(' + str(count) + words[1:]
-            except:
-                words = request.uri.split('.')
-                path = words[0] + ' (1)' + words[1]
+            if(os.access(path, os.W_OK)):
+                try:
+                    words = request.uri.split('(')
+                    count = int(words[1][0])
+                    count += 1
+                    path = words[0] + '(' + str(count) + words[1:]
+                except:
+                    words = request.uri.split('.')
+                    path = words[0] + '(1).' + words[1]
 
-            response_line = self.response_line(403)
-            #content type checking 
-            fp = open(path, 'wb')
-            for line in data:
-                fp.writelines(line)
-            fp.close()
+                response_line = self.response_line(204)
+                #content type checking 
+                fp = open(path, 'wb')
+                fp.write(data)
+                fp.close()
+
+            else:
+                response_line = self.response_line(403)
     	
         else:
             response_line = self.response_line(201)
             f1 = open(path, 'wb')
-            for line in data:
-                f1.writelines(line)
+            f1.write(data)
             f1.close()
 
         #Sun, 06 Nov 1994 08:49:37 GMT

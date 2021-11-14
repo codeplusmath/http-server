@@ -41,11 +41,11 @@ class TCPServer:
     
 
     def handle_all(self, conn, addr):
-        data = conn.recv(8192)
+        data = conn.recv(10485760)
         response , connectiontype = self.handle_request(data)
         conn.sendall(response)
         
-        if(connectiontype == 'Close'):
+        if(connectiontype == 'close'):
             conn.close()
 
 		

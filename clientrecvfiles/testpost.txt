@@ -6,7 +6,7 @@
 </head>
 <body>
 	<h>
-		This folder will contain all website files as root directory.
+		You logged in successfully
 	</h>
 </body>
 </html>

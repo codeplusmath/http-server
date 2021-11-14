@@ -3,7 +3,7 @@ import unittest
 import requests
 import os
 import socket
-
+import gzip
 def GetDictFile(filename):
     f = open(f'./testfiles/{filename}', 'r')
     data = f.readlines()[1:]
@@ -11,6 +11,7 @@ def GetDictFile(filename):
     for line in data:
         words = line.split(': ')
         header_data[words[0]] = words[1].strip('\n')
+
     f.close()
     return header_data
 
@@ -159,56 +160,66 @@ class TestHeadRequest(unittest.TestCase):
         self.assertEqual(r.status_code, 404)
 
 '''
-
 class TestPutRequest(unittest.TestCase):
-    def Test_Put_txtfile(self):
-        
-    def Test_Put_pngfile(self):
-    
-    def Test_Put_htmlfile(self):
-    
-    def Test_Put_mp3file(self):
-    
-    def Test_Put_pdffile(self):
-    
-    def Test_Put_pyfile(self):
-    
-    def Test_Put_jsfile(self):
-    
-    def Test_Put_cssfile(self):
-    
-    def Test_Put_204(self):
-    
-    def Test_Put_201(self):
+    def test_Put_txtfile(self):
+        req_headers = GetDictFile('put_req.txt')
+        f = open('./clientrecvfiles/testput.txt', 'rb')
+        data = f.read()        
+        r = requests.put('http://127.0.0.1:8888/Upload/testput.txt', headers = req_headers, data = data)
+        print(r)
+        f.close()
+        print('file closed')
+        self.assertEqual(r.status_code, 201)
 
+    def test_Put_204(self):
+        req_headers = GetDictFile('put_req.txt')
+        f = open('./clientrecvfiles/testput.txt', 'rb')
+        data = f.read()
+        r = requests.put('http://127.0.0.1:8888/Upload/testput.txt', headers = req_headers, data)
+        f.close()
+        self.assertEqual(r.status_code, 204)
+
+    def test_Put_403(self):
+        req_headers = GetDictFile('put_req.txt')
+        f = open('./clientrecvfiles/testput.txt', 'rb')
+        data = f.read()
+        r = requests.put('http://127.0.0.1:8888/Upload/readonly.txt', headers = req_headers, data)
+        f.close()
+        self.assertEqual(r.status_code, 403)
 
 
 class TestPostRequest(unittest.TestCase):
+    
     def test_Post_txtfile(self):
-    
-    def test_Post_pngfile(self):
-    
-    def test_Post_htmlfile(self):
-    
-    def test_Post_mp3file(self):
-    
-    def test_Post_pdffile(self):
-    
-    def test_Post_pyfile(self):
-    
-    def test_Post_jsfile(self):
-    
-    def test_Post_cssfile(self):
-    
-    def test_Post_201(self):
-    
+        req_headers = GetDictFile('post_req.txt')
+        f = open('./clientrecvfiles/testpost.txt', 'rb')
+        data = f.read()
+        r = requests.post('http://127.0.0.1:8888/Upload/testpost.txt', headers = req_headers, data = data)
+        f.close()
+        self.assertEqual(r.status_code, 201)
+
     def test_Post_403(self):
+        req_headers = GetDictFile('post_req.txt')
+        f = open('./clientrecvfiles/testpost.txt', 'rb')
+        data = f.read()
+        r = requests.post('http://127.0.0.1:8888/Upload/readonly.txt', headers = req_headers, data = data)
+        f.close()
+        self.assertEqual(r.status_code, 403)
     
     def test_Post_urlencoded(self):
+        req_headers = GetDictFile('post_req.txt')
+        f = open('./clientrecvfiles/testpost.txt', 'rb')
+        r = requests.post('http://127.0.0.1:8888/Upload/testurlencoded.txt', headers = req_headers, data = data)
+        self.assertEqual(r.status_code, 201)
     
     def test_Post_multipart(self):
+        req_headers = GetDictFile('post_req.txt')
+        f = open('./clientrecvfiles/testpost.txt', 'rb')
+        r = requests.post('http://127.0.0.1:8888/Upload/testmultipart.txt', headers = req_headers, data = data)
+        self.assertEqual(r.status_code, 201)
 
 '''
+
 class TestDeleteRequest(unittest.TestCase):
     def test_Delete_txtfile(self):
         req_headers = GetDictFile('delete_req.txt')
