@@ -20,7 +20,7 @@ class TCPServer:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((self.host, self.port))
         s.listen()
-        logg.lprint(0, ("Listening at", s.getsockname(),))
+        logg.lprint(0, ("Listening at", s.getsockname()))
         
         thread_list = []
 
@@ -33,7 +33,7 @@ class TCPServer:
             thread_list.append(th)
             if threading.active_count() > MAX_CONNECTIONS:
                 th.join()
-                print('Connection Limit exceeded. Retrying in 5 seconds')
+                logg.lprint(0, ('Connection Limit exceeded. Retrying in 5 seconds'))
                 time.sleep(5)
         
         for i in thread_list:
@@ -41,10 +41,10 @@ class TCPServer:
     
 
     def handle_all(self, conn, addr):
-        data = conn.recv(10485760)
+        data = conn.recv(1048576)
         response , connectiontype = self.handle_request(data)
         conn.sendall(response)
-        
+        logg.lprint(2, (f'Request Received from {addr}'))
         if(connectiontype == 'close'):
             conn.close()
 

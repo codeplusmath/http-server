@@ -1,1 +1,4 @@
-Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 8888)
+Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 8888)Connected by('127.0.0.1', 43722)GET /notfound.txtHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 43722)Connected by('127.0.0.1', 43724)GET /test.wavHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 43724)Connected by('127.0.0.1', 43726)GET /test.cssHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 43726)Connected by('127.0.0.1', 43728)GET /login.htmlHTTP/1.1 404 Not Found

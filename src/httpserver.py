@@ -35,12 +35,12 @@ class HTTPServer(TCPServer):
     
     def handle_request(self, data):
         request = HTTPRequest(data)
-
+    
         try:
             handler = getattr(self, 'handle_%s' % request.method)
         except AttributeError:
             handler = self.HTTP_501_handler
-
+        logg.lprint(1, (f'{request.method} {request.uri}'))
         response, connectiontype = handler(request)
         return response, connectiontype
 
@@ -48,6 +48,7 @@ class HTTPServer(TCPServer):
     def response_line(self, status_code):
         reason = self.status_codes[status_code]
         response_line = 'HTTP/1.1 %s %s\r\n' % (status_code, reason)
+        logg.lprint(1, (response_line))
         return response_line.encode() 
 
 
@@ -66,9 +67,9 @@ class HTTPServer(TCPServer):
 
     def handle_OPTIONS(self, request):
         response_line = self.response_line(200)
-        extra_headers = {'Allow': 'OPTIONS, GET'}
+        extra_headers = {'Allow': 'OPTIONS, GET, HEAD, PUT, POST, DELETE'}
         response_headers = self.response_headers(extra_headers)
-
+        
         blank_line = b'\r\n'
         return b''.join([response_line, response_headers, blank_line])
 
@@ -126,11 +127,11 @@ class HTTPServer(TCPServer):
  
             else:
                 os.remove(f'../cookies/{request.other_headers[cookie_string]}')
-                extra_headers['set-cookie'] = cookies.set_cookie()
+                extra_headers['set-cookie'] = cookies.set_cookie(path)
                 request.other_headers.pop('Cookie')
         
         elif path == '../www/login.html':
-            extra_headers['set-cookie'] = cookies.set_cookie()
+            extra_headers['set-cookie'] = cookies.set_cookie(path)
 
         else:
             pass

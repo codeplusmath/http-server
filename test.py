@@ -112,7 +112,7 @@ class TestGetRequest(unittest.TestCase):
         r = requests.get('http://127.0.0.1:8888/notfound.txt', headers = req_headers)
         self.assertEqual(r.status_code, 404)
 
-
+'''
 class TestHeadRequest(unittest.TestCase):    
     def test_Head_txtfile(self):
         req_headers = GetDictFile('head_req.txt')
@@ -159,7 +159,7 @@ class TestHeadRequest(unittest.TestCase):
         r = requests.get('http://127.0.0.1:8888/notfound.txt', headers = req_headers)
         self.assertEqual(r.status_code, 404)
 
-'''
+
 class TestPutRequest(unittest.TestCase):
     def test_Put_txtfile(self):
         req_headers = GetDictFile('put_req.txt')
@@ -218,7 +218,7 @@ class TestPostRequest(unittest.TestCase):
         r = requests.post('http://127.0.0.1:8888/Upload/testmultipart.txt', headers = req_headers, data = data)
         self.assertEqual(r.status_code, 201)
 
-'''
+
 
 class TestDeleteRequest(unittest.TestCase):
     def test_Delete_txtfile(self):
@@ -270,7 +270,7 @@ class TestDeleteRequest(unittest.TestCase):
         req_headers = GetDictFile('delete_req.txt')
         r = requests.delete('http://127.0.0.1:8888/anything.txt', headers = req_headers)
         self.assertEqual(r.status_code, 404)
-
+'''
 
 class TestInvalidRequest(unittest.TestCase):
     def test_Invalid(self):
