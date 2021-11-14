@@ -9,6 +9,7 @@ import cookies
 from linecache import getline
 import hashlib
 import random
+import gzip
 
 global cookie_status_flag
 cookie_status_flag = 0
@@ -41,7 +42,7 @@ class HTTPServer(TCPServer):
             handler = self.HTTP_501_handler
 
         response, connectiontype = handler(request)
-        return response
+        return response, connectiontype
 
 
     def response_line(self, status_code):
@@ -73,18 +74,17 @@ class HTTPServer(TCPServer):
 
     
     def handle_GET(self, request):
-        path = './www/' + request.uri.strip('/') 
+        path = '../www/' + request.uri.strip('/') 
         
-        if not path:
-            path = './www/' + 'index.html'
+        if not request.uri.strip('/'):
+            path = '../www/' + 'index.html'
 
-        if request.other_headers.has_key('If-None-Match'):
+        if 'If-None-Match' in request.other_headers.keys():
             Etag = request.other_headers['If-None-Match']
             request.other_headers.pop('If-None-Match')
             request.other_headers['Etag'] = Etag
         else:
             Etag = hashlib.md5(os.urandom(32)).hexdigest()
-            request.other_headers.pop('If-None-Match')
             request.other_headers['Etag'] = Etag
 
         if os.path.exists(path) and not os.path.isdir(path): 
@@ -97,36 +97,40 @@ class HTTPServer(TCPServer):
                 md5 = hashlib.md5(response_body).hexdigest()
                 f.close()
             
+            response_body = gzip.compress(response_body)
             content_length = len(response_body)
             extra_headers = {'Content-Length': content_length, 'Content-Type': content_type, 'Content-Encoding': 'gzip', 'Last-Modified': last_modified, 'Etag': Etag,'Content-md5': md5}
 
         else:
             response_line = self.response_line(404)
             response_body = b'<h1>404 Not Found</h1>'
+            response_body = gzip.compress(response_body)
             content_length = len(response_body)
             md5 = hashlib.md5(response_body).hexdigest()
             extra_headers = {'Content-Length': content_length, 'Content-Type': 'text/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Etag': Etag, 'Content-md5': md5}
 
         cookie_string = 'Cookie'
 
-        if request.other_headers.has_key('Cookie') and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
-            edate = datetime.date(getline(f'../cookies/{request.other_headers[cookie_string]}', 2).strip('\n'))
+        if 'Cookie' in request.other_headers.keys() and os.path.exists(f'../cookies/{request.other_headers[cookie_string]}'):
+            edate = getline(f'../cookies/{request.other_headers[cookie_string]}', 2).strip('\n')
+            edate = datetime.strptime(edate[0:10], '%Y-%m-%d')
 
-            if edate - datetime.now() >=0:
+            if (edate - datetime.now()).days >0:
                 cookie_status_flag = 1
-                path = './www/' + 'afterlogin.html'    
+                path = '../www/' + 'afterlogin.html'    
                 with open(path, 'rb') as f:
                     response_body = f.read()
                     f.close()
+                response_body = gzip.compress(response_body)
+                extra_headers['Content-Length'] = len(response_body)
  
             else:
                 os.remove(f'../cookies/{request.other_headers[cookie_string]}')
-                cookie_header = cookies.setcookie('./www/login.html')
-                request.other_headers.pop('cookie')
+                extra_headers['set-cookie'] = cookies.set_cookie()
+                request.other_headers.pop('Cookie')
         
-        elif path == './www/login.html':
-            cookie_header = cookies.setcookie(path)
-            self.other_headers.pop('Cookie')
+        elif path == '../www/login.html':
+            extra_headers['set-cookie'] = cookies.set_cookie()
 
         else:
             pass
@@ -145,10 +149,10 @@ class HTTPServer(TCPServer):
     
     
     def handle_HEAD(self, request):
-        path = './www/' + request.uri.strip('/')
+        path = '../www/' + request.uri.strip('/')
 
         if not path:
-            path = './www/' + 'index.html'
+            path = '../www/' + 'index.html'
 
         if os.path.exists(path) and not os.path.isdir(path):
             response_line = self.response_line(200)
@@ -162,6 +166,7 @@ class HTTPServer(TCPServer):
         else:
             response_line = self.response_line(404)
             response_body = b'<h1>404 Not Found</h1>'
+            content_length = len(response_body.decode())
             md5 = hashlib.md5(response_body).hexdigest()
             extra_headers = {'Content-Length': content_length, 'Content-Type': 'txt/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Content-md5': md5}
             response_headers = self.response_headers(extra_headers)
@@ -179,29 +184,28 @@ class HTTPServer(TCPServer):
 
 
     def handle_DELETE(self, request):
-        path = './www/' + request.uri.strip('/')
+        path = '../www/' + request.uri.strip('/')
         
-        if os.path.exits(path):
+        if os.path.exists(path):
             if(os.access(path, os.W_OK)):
                 os.remove(path)
-                response_line = self.response_line(200)
-                response_body = "<html><body><h1>File deleted.</h1></body></html>"
-                md5 = hashlib.md5(response_body).hexdigest()
-                extra_headers = {'Content-Length': content_length, 'Content-Type': 'txt/html; charset=utf-8', 'Content-Encoding': 'gzip', 'Content-md5': md5}
+                response_line = self.response_line(204)
+                response_body = ""                
+                extra_headers = {'Content-Length': 0,'Content-Type': 'txt/html; charset=utf-8', 'Content-Encoding': 'gzip'}
                 response_headers = self.response_headers(extra_headers)
 
-            else:
-                response_headers = self.response_headers()
-                if(os.path.exits(absolute_path)):
+                if(os.path.exists(path)):
                     response_line = self.response_line(202)
                     response_body = ""
-                else:
-                    response_line = self.response_line(204)
-                    response_body = ""
-                    
+            else:
+                response_line = self.response_line(403)
+                response_headers = self.response_headers()
+                response_body = ""
+
         else:
             response_headers = self.response_headers()
             response_line = self.response_line(404)
+            response_body = ""
           
         today = datetime.now()
         response_body = response_body.encode()
@@ -216,7 +220,7 @@ class HTTPServer(TCPServer):
     
 
     def handle_PUT(self, request):
-        path = './www/' + request.uri.strip('/')
+        path = '../www/' + request.uri.strip('/')
         data = request.request_data
         if os.path.exists(path):
             #updated but entity body not returned
@@ -249,7 +253,7 @@ class HTTPServer(TCPServer):
         return response, request.other_headers['Connection']
 
     def handle_POST(self, request):
-        path = './www/' + request.uri.strip('/')
+        path = '../www/' + request.uri.strip('/')
        	#data = requests.request_data
         if(request.other_headers["Content-Type"] == "application/x-www-form-urlencoded"):
             data = request.request_data.split('&')

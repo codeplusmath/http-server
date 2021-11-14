@@ -5,7 +5,8 @@ import levelwiselogging
 import headerfilter 
 import threading
 
-from config.config import HOST, PORT, USER, MAX_CONNECTIONS
+sys.path.append('../config/')
+from config import HOST, PORT, USER, MAX_CONNECTIONS
 
 logg = levelwiselogging.levelwiselogging()
 
@@ -44,7 +45,7 @@ class TCPServer:
         response , connectiontype = self.handle_request(data)
         conn.sendall(response)
         
-        if(connectiontype == 'Close')
+        if(connectiontype == 'Close'):
             conn.close()
 
 		

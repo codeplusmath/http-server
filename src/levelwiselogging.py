@@ -1,22 +1,16 @@
 #!/usr/bin/python
+import sys
 
+sys.path.append('../config/')
+from config import USER
 Users = {'Normal':0, 'Admin':1, 'Developer':2}
 
 class levelwiselogging:
     def __init__(self):
         self.configfile = '../config/config.py'
-        self.usertype = self.getUserType()
+        self.usertype = Users[USER]
         self.logfile = '../logs/log.txt'
 
-    def getUserType(self):
-        with open(self.configfile, 'r') as fileobj:
-            for line in fileobj:
-                words = line.strip(' = ')
-                for w in words:
-                    if w == 'USER':
-                        return Users[words[1]]
-                    else:
-                        return 0
 
     def lprint(self, level, tup):
         if level == self.usertype:
@@ -31,5 +25,5 @@ class levelwiselogging:
                 print('Error: 0x001\nCan\'t append log to file\n')
             return 0
         else:
-            print('Error: 0x002\nIncorrect user type\n')
+            pass
             return 1

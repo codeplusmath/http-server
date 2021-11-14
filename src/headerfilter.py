@@ -3,7 +3,7 @@
 def hfilter(data):
     # [b'HOST: 127.0.0.1:5000']
     filtered_headers = {}
-    avoid_headers = [b'Host', b'Accept-Encoding', b'Accept-Language', b'Accept', b'User-Agent']
+    avoid_headers = ['Host', 'Accept-Encoding', 'Accept-Language', 'Accept', 'User-Agent']
     for d in data:
         tmp = d.decode().split(': ')
         #'HOST' '127.0.0.1:5000'
