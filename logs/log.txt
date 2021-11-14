@@ -2,3 +2,20 @@ Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 8888)Listening at('127.
 Request Received from ('127.0.0.1', 43722)Connected by('127.0.0.1', 43724)GET /test.wavHTTP/1.1 404 Not Found
 Request Received from ('127.0.0.1', 43724)Connected by('127.0.0.1', 43726)GET /test.cssHTTP/1.1 404 Not Found
 Request Received from ('127.0.0.1', 43726)Connected by('127.0.0.1', 43728)GET /login.htmlHTTP/1.1 404 Not Found
+Listening at('127.0.0.1', 8888)Connected by('127.0.0.1', 48172)GET /notfound.txtHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 48172)Connected by('127.0.0.1', 48174)GET /test.wavHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 48174)Connected by('127.0.0.1', 48176)GET /test.cssHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 48176)Connected by('127.0.0.1', 48178)GET /login.htmlHTTP/1.1 404 Not Found
+Listening at('127.0.0.1', 8888)Listening at('127.0.0.1', 5000)Connected by('127.0.0.1', 60348)GET /notfound.txtHTTP/1.1 404 Not Found
+Request Received from ('127.0.0.1', 60348)Connected by('127.0.0.1', 60350)GET /test.wavHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60350)Connected by('127.0.0.1', 60352)GET /test.cssHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60352)Connected by('127.0.0.1', 60354)GET /login.htmlHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60354)Connected by('127.0.0.1', 60356)GET /index.htmlHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60356)Connected by('127.0.0.1', 60358)GET /login.htmlHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60358)Connected by('127.0.0.1', 60360)GET /test.jsHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60360)Connected by('127.0.0.1', 60362)GET /test.pdfHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60362)Connected by('127.0.0.1', 60364)GET /test.pngHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60364)Connected by('127.0.0.1', 60366)GET /test.pyHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60366)Connected by('127.0.0.1', 60368)GET /test.txtHTTP/1.1 200 OK
+Request Received from ('127.0.0.1', 60368)Connected by('127.0.0.1', 60370)PATCH /index.htmlHTTP/1.1 501 Not Implemented
+Request Received from ('127.0.0.1', 60370)

@@ -1,15 +1,15 @@
 #!/usr/bin/python
 import sys
 
-sys.path.append('./config/')
+sys.path.append('../config/')
 from config import USER
 Users = {'Normal':0, 'Admin':1, 'Developer':2}
 
 class levelwiselogging:
     def __init__(self):
-        self.configfile = './config/config.py'
+        self.configfile = '../config/config.py'
         self.usertype = Users[USER]
-        self.logfile = './logs/log.txt'
+        self.logfile = '../logs/log.txt'
 
 
     def lprint(self, level, tup):
